@@ -1,0 +1,65 @@
+next-version: 1.0.0
+mode: ContinuousDeployment
+
+commit-message-incrementing: Enabled
+
+major-version-bump-message: '(?m)^(breaking|major)(\(.+\))?!?:'
+minor-version-bump-message: '(?m)^(feat|feature)(\(.+\))?:|Merge branch ''dev'''
+patch-version-bump-message: '(?m)^(fix|bugfix|patch)(\(.+\))?:'
+no-bump-message: '(?m)^(docs|style|refactor|test|chore)(\(.+\))?:'
+
+branches:
+  main:
+    regex: ^(main|master)$
+    is-release-branch: true
+    increment: Patch
+    mode: ContinuousDeployment
+    source-branches:
+      - develop
+    
+  develop:
+    regex: ^dev(elop)?(ment)?$
+    tag: alpha
+    increment: Minor  
+    is-release-branch: false
+    mode: ContinuousDeployment
+    source-branches:
+      - main
+      
+  feature:
+    regex: ^features?[/-](?<BranchName>.+)
+    tag: '{BranchName}'
+    increment: Minor  
+    is-release-branch: false
+    mode: ContinuousDeployment
+    source-branches:
+      - main
+      - develop
+      
+  bugfix:
+    regex: ^(bugfix|fix)[/-](?<BranchName>.+)
+    tag: 'fix-{BranchName}'
+    increment: Patch
+    is-release-branch: false
+    mode: ContinuousDeployment
+    source-branches:
+      - main
+      - develop
+
+  release:
+    regex: ^release$
+    tag: beta
+    increment: None
+    is-release-branch: true
+    mode: ContinuousDeployment
+    source-branches:
+      - develop
+
+  hotfix:
+    regex: ^hotfix(es)?[/-]
+    tag: hotfix
+    increment: Patch
+    is-release-branch: false
+    mode: ContinuousDeployment
+    source-branches:
+      - main
