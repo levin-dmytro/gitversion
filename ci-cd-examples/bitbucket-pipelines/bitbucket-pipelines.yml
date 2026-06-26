@@ -1,0 +1,24 @@
+# Обязательно качаем всю историю, иначе GitVersion не сможет посчитать версию
+clone:
+  depth: full
+
+pipelines:
+  default:
+    - step:
+        name: Calculate GitVersion
+        # Используем официальный образ GitVersion версии 6.x
+        image: gittools/gitversion:6.0.2-debian.11-6.0
+        script:
+          - VERSION=$(/tools/dotnet-gitversion /output json /showvariable SemVer)
+          - echo "Вычисленная версия $VERSION"
+          # Сохраняем в файл для передачи между шагами пайплайна
+          - echo "export VERSION=$VERSION" > version.env
+        artifacts:
+          - version.env
+
+    - step:
+        name: Build and Push
+        script:
+          - source version.env
+          - echo "Собираем докер образ с тегом $VERSION"
+          # - docker build -t my-app:$VERSION .

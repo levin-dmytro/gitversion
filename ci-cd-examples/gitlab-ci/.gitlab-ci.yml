@@ -1,0 +1,31 @@
+stages:
+  - determine_version
+  - build
+
+variables:
+  GIT_DEPTH: 0 # GitVersion требует полную историю для вычисления версии
+
+determine_version:
+  stage: determine_version
+  image:
+    name: gittools/gitversion:6.0.2-debian.11-6.0
+    entrypoint: ['']
+  script:
+    - git fetch --tags --force
+    - VERSION=$(/tools/dotnet-gitversion /output json /showvariable SemVer)
+    - echo "Вычисленная версия $VERSION"
+    - printf "VERSION=%s\n" "$VERSION" > version.env
+  artifacts:
+    reports:
+      dotenv: version.env
+    paths:
+      - version.env
+    expire_in: 1 hour
+
+build_image:
+  stage: build
+  dependencies:
+    - determine_version
+  script:
+    - echo "Собираем докер образ с тегом $VERSION"
+    # - docker build -t my-app:$VERSION .

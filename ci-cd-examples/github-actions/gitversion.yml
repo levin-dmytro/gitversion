@@ -1,0 +1,44 @@
+name: "GitVersion Example"
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  versioning:
+    name: Determine Version
+    runs-on: ubuntu-latest
+    outputs:
+      semVer: ${{ steps.gitversion.outputs.semVer }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Обязательно для GitVersion, чтобы скачать всю историю и теги
+
+      - name: Setup GitVersion
+        uses: gittools/actions/gitversion/setup@v3.0.0
+        with:
+          versionSpec: '6.0.0' # Используем версию 6.x
+
+      - name: Execute GitVersion
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3.0.0
+        with:
+          useConfigFile: true
+          configFilePath: 'GitVersion.yml'
+
+      - name: Display Computed Version
+        run: |
+          echo "Semantic Version: ${{ steps.gitversion.outputs.semVer }}"
+          echo "Full SemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+          
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: versioning
+    steps:
+      - name: Build with version
+        run: |
+          echo "Building image with tag ${{ needs.versioning.outputs.semVer }}"
