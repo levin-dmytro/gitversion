@@ -1,0 +1,54 @@
+mode: ContinuousDelivery
+
+commit-message-incrementing: Enabled
+
+major-version-bump-message: '(?m)^(breaking|major)(\(.+\))?!?:'
+minor-version-bump-message: '(?m)^(feat|feature)(\(.+\))?:|Merge branch ''dev'''
+patch-version-bump-message: '(?m)^(fix|bugfix|patch)(\(.+\))?:'
+no-bump-message: '(?m)^(docs|style|refactor|test|chore)(\(.+\))?:'
+
+branches:
+  main:
+    regex: ^(main|master)$
+    is-release-branch: true
+    increment: Patch
+    prevent-increment:
+      of-merged-branch: false
+    track-merge-message: true
+    track-merge-target: true
+    source-branches:
+      - develop
+    mode: ContinuousDeployment
+    
+  develop:
+    mode: ContinuousDelivery  
+    regex: ^dev(elop)?(ment)?$
+    label: alpha
+    increment: Minor  
+    is-release-branch: false
+    track-merge-target: false
+    track-merge-message: true
+    source-branches:
+      - main
+      
+  feature:
+    mode: ContinuousDelivery
+    regex: ^features?[/-](?<BranchName>.+)
+    label: '{BranchName}'
+    increment: Minor  
+    is-release-branch: false
+    track-merge-message: true
+    source-branches:
+      - main
+      - develop
+      
+  bugfix:
+    mode: ContinuousDelivery
+    regex: ^(bugfix|fix)[/-](?<BranchName>.+)
+    label: 'fix-{BranchName}'
+    increment: Patch
+    is-release-branch: false
+    track-merge-message: true
+    source-branches:
+      - main
+      - develop
