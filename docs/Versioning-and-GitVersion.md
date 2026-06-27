@@ -24,16 +24,7 @@ Our version calculation is deeply integrated with the GitFlow branching model. G
 - **`release/*`**: Stabilization branches preparing for production. Versions here use a `beta` or `rc` pre-release tag (e.g., `1.2.0-beta.1`).
 - **`hotfix/*`**: Emergency fixes directly targeting `main`. They bump the patch version (e.g., `1.1.2-beta.1`).
 
-### 2. Version Calculation Logic (v6 vs v5)
-
-We explicitly mandate the use of **GitVersion version 6.x** across all CI/CD pipelines.
-
-> [!WARNING]
-> **Do not use GitVersion v5.x.** Version 5 relied on a `BaseVersionCalculator` that added increments from various sources together, leading to unpredictable "double-bumps" (e.g., skipping from `1.1.0` to `1.3.0` unintentionally).
-
-**GitVersion v6** introduces the `NextVersionCalculator`, which evaluates all possible version increments (from branches, tags, and commit messages) and selects the `Max()` increment. This ensures stable, predictable, and idempotent version calculation regardless of how many feature branches are merged.
-
-### 3. Conventional Commits
+### 2. Conventional Commits
 
 While GitFlow structure alone dictates the general flow of versions, **Conventional Commits** can be used to explicitly force specific version increments within the branch:
 
@@ -43,7 +34,7 @@ While GitFlow structure alone dictates the general flow of versions, **Conventio
 
 *Note: In GitVersion v6, if you merge a feature branch into `develop` without any `feat:` prefix, the system still gracefully increments the minor version because merging into `develop` inherently signals a continuous minor version progression.*
 
-### 4. CI/CD Integrations
+### 3. CI/CD Integrations
 
 GitVersion v6 is platform-agnostic. We support its execution across various CI/CD toolchains. A sandbox repository with full working examples is available at [levin-dmytro/gitversion](https://github.com/levin-dmytro/gitversion).
 
