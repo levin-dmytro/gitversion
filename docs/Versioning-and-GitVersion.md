@@ -35,7 +35,8 @@ While GitFlow structure alone dictates the general flow of versions, **Conventio
 
 - `fix:` / `bugfix:` → Forces a **Patch** increment (e.g., `1.1.0` → `1.1.1`).
 - `feat:` / `feature:` → Forces a **Minor** increment (e.g., `1.1.1` → `1.2.0`).
-- `BREAKING CHANGE:` → Forces a **Major** increment (e.g., `1.2.0` → `2.0.0`).
+- **Major Increments (Breaking Changes)**: Instead of the verbose `BREAKING CHANGE:` footer, the standard and preferred shorthand is appending an exclamation mark `!` after the commit type (e.g., `feat!: rewrite API` or `fix(core)!: change behavior`). GitVersion also accepts explicit tags in the message body like `+semver: major`.
+- **Other Prefixes**: Prefixes such as `docs:`, `chore:`, `refactor:`, `style:`, and `test:` **do not** trigger any version increment by default, as they do not affect the compiled production code.
 
 *Note: In GitVersion v6, if you merge a feature branch into `develop` without any `feat:` prefix, the system still gracefully increments the minor version because merging into `develop` inherently signals a continuous minor version progression.*
 
