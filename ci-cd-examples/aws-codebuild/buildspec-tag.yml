@@ -9,14 +9,15 @@ phases:
 
   pre_build:
     commands:
+      - 'git fetch --tags || true'
       - 'echo "Calculating Semantic Version using GitVersion..."'
       - 'VERSION=$(dotnet-gitversion /output json /showvariable SemVer)'
       - 'echo "Computed Version - $VERSION"'
 
   build:
     commands:
-      - 'echo "Action: Creating and pushing Git Tag $VERSION"'
+      - 'echo "Action: Creating and pushing Git Tag v$VERSION"'
       - 'git config --global user.name "AWS CodeBuild"'
       - 'git config --global user.email "codebuild@example.com"'
-      - 'git tag -a "$VERSION" -m "Release $VERSION" || true'
-      - 'echo "Simulated push: git push origin $VERSION"'
+      - 'git tag -a "v$VERSION" -m "Release v$VERSION" || true'
+      - 'echo "Simulated push: git push origin v$VERSION"'

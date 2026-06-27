@@ -11,6 +11,7 @@ phases:
     commands:
       - 'echo "Logging in to Amazon ECR..."'
       - 'aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com'
+      - 'git fetch --tags || true'
       - 'echo "Calculating Semantic Version using GitVersion..."'
       - 'VERSION=$(dotnet-gitversion /output json /showvariable SemVer)'
       - 'SHORT_SHA=$(dotnet-gitversion /output json /showvariable ShortSha)'
