@@ -21,8 +21,8 @@ phases:
   build:
     commands:
       - 'echo "Action: Building Docker image for $VERSION"'
-      - 'echo "Applying double tags and OCI labels..."'
-      - 'docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$VERSION -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$SHORT_SHA --label org.opencontainers.image.revision=$COMMIT_SHA --label org.opencontainers.image.source=$CODEBUILD_SOURCE_REPO_URL .'
+      - 'echo "Applying double tags..."'
+      - 'docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$VERSION -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$SHORT_SHA .'
 
   post_build:
     commands:
