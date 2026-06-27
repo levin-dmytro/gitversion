@@ -3,29 +3,30 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Installing GitVersion..."
-      - dotnet tool install --global GitVersion.Tool --version 6.0.2
-      - export PATH="$PATH:/root/.dotnet/tools"
+      - 'echo "Installing GitVersion..."'
+      - 'dotnet tool install --global GitVersion.Tool --version 6.0.2'
+      - 'export PATH="$PATH:/root/.dotnet/tools"'
 
   pre_build:
     commands:
-      - echo "Logging in to Amazon ECR..."
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - echo "Calculating Semantic Version using GitVersion..."
-      - VERSION=$(dotnet-gitversion /output json /showvariable SemVer)
-      - SHORT_SHA=$(dotnet-gitversion /output json /showvariable ShortSha)
-      - COMMIT_SHA=$(dotnet-gitversion /output json /showvariable Sha)
-      - echo "Computed Version - $VERSION"
-      - echo "Computed Short SHA - $SHORT_SHA"
+      - 'echo "Logging in to Amazon ECR..."'
+      - 'aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com'
+      - 'echo "Calculating Semantic Version using GitVersion..."'
+      - 'VERSION=$(dotnet-gitversion /output json /showvariable SemVer)'
+      - 'SHORT_SHA=$(dotnet-gitversion /output json /showvariable ShortSha)'
+      - 'COMMIT_SHA=$(dotnet-gitversion /output json /showvariable Sha)'
+      - 'echo "Computed Version - $VERSION"'
+      - 'echo "Computed Short SHA - $SHORT_SHA"'
 
   build:
     commands:
-      - echo "Action: Building Docker image for $VERSION"
-      - echo "Applying double tags and OCI labels..."
-      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$VERSION -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$SHORT_SHA --label org.opencontainers.image.revision=$COMMIT_SHA --label org.opencontainers.image.source=$CODEBUILD_SOURCE_REPO_URL .
+      - 'echo "Action: Building Docker image for $VERSION"'
+      - 'echo "Applying double tags and OCI labels..."'
+      - 'docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$VERSION -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$SHORT_SHA --label org.opencontainers.image.revision=$COMMIT_SHA --label org.opencontainers.image.source=$CODEBUILD_SOURCE_REPO_URL .'
+
   post_build:
     commands:
-      - echo "Pushing Docker images to ECR..."
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$VERSION
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$SHORT_SHA
-      - echo "Simulated trigger of Deploy Pipeline..."
+      - 'echo "Pushing Docker images to ECR..."'
+      - 'docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$VERSION'
+      - 'docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$SHORT_SHA'
+      - 'echo "Simulated trigger of Deploy Pipeline..."'
