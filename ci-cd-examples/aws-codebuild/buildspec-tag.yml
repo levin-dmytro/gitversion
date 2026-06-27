@@ -18,5 +18,5 @@ phases:
       - echo "Action: Creating and pushing Git Tag $VERSION"
       - git config --global user.name "AWS CodeBuild"
       - git config --global user.email "codebuild@example.com"
-      - git tag -a "$VERSION" -m "Release $VERSION [skip ci]" || true
+      - git tag -a "$VERSION" -m "Release $VERSION" || true
       - echo "Simulated push: git push origin $VERSION"
