@@ -1,0 +1,29 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - 'echo "Installing GitVersion..."'
+      - 'dotnet tool install --global GitVersion.Tool --version 6.0.2'
+      - 'export PATH="$PATH:/root/.dotnet/tools"'
+
+  pre_build:
+    commands:
+      - 'git fetch --tags || true'
+      - 'echo "Calculating Semantic Version using GitVersion..."'
+      - 'VERSION=$(dotnet-gitversion /output json /showvariable MajorMinorPatch)'
+      - 'echo "Computed Production Version - $VERSION"'
+
+  build:
+    commands:
+      - 'echo "Action: Promoting existing Docker image to $VERSION"'
+      - 'SOURCE_SHA=$(git rev-parse --short=7 HEAD^2 2>/dev/null || git rev-parse --short=7 HEAD)'
+      - 'echo "Identified source image SHA from develop/release: $SOURCE_SHA"'
+      - 'MANIFEST=$(aws ecr batch-get-image --repository-name $IMAGE_REPO_NAME --image-ids imageTag=$SOURCE_SHA --query "images[0].imageManifest" --output text)'
+      - |
+        if [ "$MANIFEST" = "None" ] || [ -z "$MANIFEST" ]; then
+          echo "ERROR: Source image with tag $SOURCE_SHA not found in ECR!"
+          exit 1
+        fi
+      - 'echo "Attaching tag $VERSION to existing image..."'
+      - 'aws ecr put-image --repository-name $IMAGE_REPO_NAME --image-tag $VERSION --image-manifest "$MANIFEST" || echo "Tag already attached"'
