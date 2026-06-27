@@ -40,7 +40,16 @@ While GitFlow structure alone dictates the general flow of versions, **Conventio
 
 *Note: In GitVersion v6, if you merge a feature branch into `develop` without any `feat:` prefix, the system still gracefully increments the minor version because merging into `develop` inherently signals a continuous minor version progression.*
 
-### 3. CI/CD Integrations
+### 3. Common Merge Scenarios
+
+Based on the GitFlow methodology, here is exactly what happens to the version during standard merges (assuming no manual `Conventional Commits` overrides are used):
+
+- **`feature/*` → `develop`**: Triggers a **Minor** increment. Delivering a new feature to the integration branch signals that the next release will have new functionality.
+- **`release/*` → `main`**: Finalizes the version. It drops the pre-release tag (e.g., `-beta.1`) and publishes the stable version (e.g., `1.2.0`). It does *not* add a new mathematical increment; it just confirms the version that was prepared on the release branch.
+- **`hotfix/*` → `main`**: Triggers a **Patch** increment. Emergency fixes are intended strictly to resolve bugs in production, incrementing the third digit (e.g., `1.1.0` → `1.1.1`).
+- **`develop` → `main`**: (When skipping a formal `release` branch). Finalizes the accumulated integration version, dropping the `-alpha` tag and publishing the stable **Minor** release (e.g., `1.2.0-alpha.5` → `1.2.0`).
+
+### 4. CI/CD Integrations
 
 GitVersion v6 is platform-agnostic. We support its execution across various CI/CD toolchains. A sandbox repository with full working examples is available at [levin-dmytro/gitversion](https://github.com/levin-dmytro/gitversion).
 
