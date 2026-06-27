@@ -1,0 +1,70 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing GitVersion..."
+      - dotnet tool install --global GitVersion.Tool --version 6.0.2
+      - export PATH="$PATH:/root/.dotnet/tools"
+
+  pre_build:
+    commands:
+      - echo "Calculating Semantic Version using GitVersion..."
+      - VERSION=$(dotnet-gitversion /output json /showvariable SemVer)
+      - SHORT_SHA=$(dotnet-gitversion /output json /showvariable ShortSha)
+      - BRANCH_NAME=$(dotnet-gitversion /output json /showvariable BranchName)
+      - COMMIT_SHA=$(dotnet-gitversion /output json /showvariable Sha)
+      - echo "Computed Version - $VERSION"
+      - echo "Computed Branch - $BRANCH_NAME"
+      - echo "Computed Short SHA - $SHORT_SHA"
+
+  build:
+    commands:
+      - |
+        if [ "$BRANCH_NAME" = "main" ]; then
+          echo "====================================="
+          echo "MERGE TO MAIN DETECTED"
+          echo "====================================="
+          echo "Action: Creating and pushing Git Tag $VERSION"
+          echo "Note: Image is NOT built here. The tag creation will trigger the deploy pipeline."
+          
+          # Настройка Git для коммита
+          git config --global user.name "AWS CodeBuild"
+          git config --global user.email "codebuild@example.com"
+          
+          # Пробуем создать тег (если он уже есть, игнорируем ошибку)
+          git tag -a "$VERSION" -m "Release $VERSION [skip ci]" || true
+          
+          # Здесь была бы команда: git push origin "$VERSION"
+          echo "Simulated push: git push origin $VERSION"
+
+        elif echo "$CODEBUILD_WEBHOOK_HEAD_REF" | grep -q "^refs/tags/"; then
+          echo "====================================="
+          echo "TAG TRIGGER DETECTED"
+          echo "====================================="
+          echo "Action: Building RELEASE image for tag $VERSION"
+          echo "Applying double tags and OCI labels..."
+          
+          echo "docker build -t my-app:$VERSION -t my-app:$SHORT_SHA \\"
+          echo "  --label org.opencontainers.image.revision=$COMMIT_SHA \\"
+          echo "  --label org.opencontainers.image.source=https://github.com/levin-dmytro/gitversion.git \\"
+          echo "  ."
+          
+          echo "Simulated push to ECR..."
+          echo "Simulated trigger of Production Deploy Pipeline..."
+          
+        else
+          echo "====================================="
+          echo "BRANCH PUSH DETECTED ($BRANCH_NAME)"
+          echo "====================================="
+          echo "Action: Building DEV/FEATURE image for $VERSION"
+          echo "Applying double tags and OCI labels..."
+          
+          echo "docker build -t my-app:$VERSION -t my-app:$SHORT_SHA \\"
+          echo "  --label org.opencontainers.image.revision=$COMMIT_SHA \\"
+          echo "  --label org.opencontainers.image.source=https://github.com/levin-dmytro/gitversion.git \\"
+          echo "  ."
+          
+          echo "Simulated push to ECR..."
+          echo "Simulated trigger of Dev/Test Deploy Pipeline..."
+        fi
