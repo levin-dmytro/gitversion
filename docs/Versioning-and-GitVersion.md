@@ -24,6 +24,11 @@ Our version calculation is deeply integrated with the GitFlow branching model. G
 - **`release/*`**: Stabilization branches preparing for production. Versions here use a `beta` or `rc` pre-release tag (e.g., `1.2.0-beta.1`).
 - **`hotfix/*`**: Emergency fixes directly targeting `main`. They bump the patch version (e.g., `1.1.2-beta.1`).
 
+**Configurable Pre-release Tags (Suffixes)**
+By default, GitVersion uses the `alpha` suffix for `develop` and `beta` for `release/*`. However, these are fully configurable via the `GitVersion.yml` file. There are two common naming conventions for these suffixes:
+1. **Default**: `alpha` (for integration) and `beta` (for release stabilization).
+2. **Alternative**: `dev` (for integration, e.g., `1.2.0-dev.1`) and `rc` (Release Candidate, e.g., `1.2.0-rc.1`).
+
 ### 2. Conventional Commits
 
 While GitFlow structure alone dictates the general flow of versions, **Conventional Commits** can be used to explicitly force specific version increments within the branch:
