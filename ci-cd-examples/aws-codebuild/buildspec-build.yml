@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing GitVersion..."
+      - dotnet tool install --global GitVersion.Tool --version 6.0.2
+      - export PATH="$PATH:/root/.dotnet/tools"
+
+  pre_build:
+    commands:
+      - echo "Calculating Semantic Version using GitVersion..."
+      - VERSION=$(dotnet-gitversion /output json /showvariable SemVer)
+      - SHORT_SHA=$(dotnet-gitversion /output json /showvariable ShortSha)
+      - COMMIT_SHA=$(dotnet-gitversion /output json /showvariable Sha)
+      - echo "Computed Version - $VERSION"
+      - echo "Computed Short SHA - $SHORT_SHA"
+
+  build:
+    commands:
+      - echo "Action: Building Docker image for $VERSION"
+      - echo "Applying double tags and OCI labels..."
+      
+      - |
+        echo "docker build -t \${IMAGE_REPO_NAME:-my-app}:$VERSION -t \${IMAGE_REPO_NAME:-my-app}:$SHORT_SHA \\"
+        echo "  --label org.opencontainers.image.revision=$COMMIT_SHA \\"
+        echo "  --label org.opencontainers.image.source=\${CODEBUILD_SOURCE_REPO_URL:-https://github.com/levin-dmytro/gitversion.git} \\"
+        echo "  ."
+      
+      - echo "Simulated push to ECR..."
+      - echo "Simulated trigger of Deploy Pipeline..."

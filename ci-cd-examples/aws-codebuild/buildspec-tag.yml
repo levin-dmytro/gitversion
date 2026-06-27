@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing GitVersion..."
+      - dotnet tool install --global GitVersion.Tool --version 6.0.2
+      - export PATH="$PATH:/root/.dotnet/tools"
+
+  pre_build:
+    commands:
+      - echo "Calculating Semantic Version using GitVersion..."
+      - VERSION=$(dotnet-gitversion /output json /showvariable SemVer)
+      - echo "Computed Version - $VERSION"
+
+  build:
+    commands:
+      - echo "Action: Creating and pushing Git Tag $VERSION"
+      - git config --global user.name "AWS CodeBuild"
+      - git config --global user.email "codebuild@example.com"
+      - git tag -a "$VERSION" -m "Release $VERSION [skip ci]" || true
+      - echo "Simulated push: git push origin $VERSION"
