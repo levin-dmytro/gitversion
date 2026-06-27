@@ -125,3 +125,6 @@ resource "aws_codebuild_project" "gitversion_test_build" {
     buildspec       = "ci-cd-examples/aws-codebuild/buildspec-build.yml"
   }
 }
+
+
+
