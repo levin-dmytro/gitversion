@@ -1,0 +1,23 @@
+name: "2. Deploy (By Tag)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_tag:
+        description: 'Git Tag to Deploy (e.g. 1.2.0)'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Artifact / Image
+        run: |
+          echo "Fetching Docker image with tag: ${{ inputs.target_tag }}"
+          
+      - name: Deploy
+        run: |
+          echo "Deploying version ${{ inputs.target_tag }} to Production..."
+          echo "Deployment successful."

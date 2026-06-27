@@ -1,0 +1,22 @@
+version: 0.2
+# Этот пайплайн следует запускать вручную из AWS Console
+# Передайте переменную окружения TARGET_TAG (например, 1.2.0) при запуске сборки
+
+phases:
+  pre_build:
+    commands:
+      - |
+        if [ -z "$TARGET_TAG" ]; then
+          echo "Error: TARGET_TAG environment variable is not set."
+          exit 1
+        fi
+      - echo "Preparing to deploy tag $TARGET_TAG"
+
+  build:
+    commands:
+      - echo "Fetching artifact/image for $TARGET_TAG..."
+      - echo "Running ECS deployment / Terraform apply..."
+      
+  post_build:
+    commands:
+      - echo "Deploy of $TARGET_TAG to Production completed successfully!"

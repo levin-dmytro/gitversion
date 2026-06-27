@@ -1,0 +1,33 @@
+version: 0.2
+# Этот пайплайн следует запускать вручную из AWS Console
+# Он вычисляет версию, собирает образ и создает Git-тег
+
+phases:
+  install:
+    commands:
+      - echo "Installing GitVersion..."
+      - dotnet tool install --global GitVersion.Tool --version 6.0.2
+      # В AWS CodeBuild standard:7.0 .NET 6.0 уже установлен
+      - export PATH="$PATH:/root/.dotnet/tools"
+      
+  pre_build:
+    commands:
+      - echo "Calculating Semantic Version using GitVersion v6..."
+      - IMAGE_TAG=$(dotnet-gitversion /output json /showvariable SemVer)
+      - echo "Calculated version is $IMAGE_TAG"
+      - export VERSION=$IMAGE_TAG
+
+  build:
+    commands:
+      - echo "Building image with tag $VERSION..."
+      # docker build -t my-app:$VERSION .
+      - echo "Pushing image to ECR..."
+
+  post_build:
+    commands:
+      - echo "Creating and pushing Git Tag..."
+      - git config --global user.name "aws-codebuild"
+      - git config --global user.email "codebuild@example.com"
+      - git tag -a "$VERSION" -m "Release $VERSION [skip ci]"
+      # Примечание: Для пуша тегов у роли CodeBuild должны быть права на AWS CodeCommit (или нужно настроить SSH/PAT для GitHub)
+      - echo "git push origin $VERSION"

@@ -1,9 +1,7 @@
-name: "GitVersion Example"
+name: "1. Build and Tag"
 
 on:
-  push:
-    branches:
-      - '**'
+  workflow_dispatch: # Запуск только вручную (чтобы не спамить при тестировании)
 
 jobs:
   versioning:
@@ -32,13 +30,24 @@ jobs:
       - name: Display Computed Version
         run: |
           echo "Semantic Version: ${{ steps.gitversion.outputs.semVer }}"
-          echo "Full SemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
           
-  build:
-    name: Build
+  build-and-tag:
+    name: Build & Create Tag
     runs-on: ubuntu-latest
     needs: versioning
     steps:
-      - name: Build with version
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Build and Push Docker Image
         run: |
           echo "Building image with tag ${{ needs.versioning.outputs.semVer }}"
+          echo "Pushing image to ECR..."
+          
+      - name: Create and Push Git Tag
+        run: |
+          VERSION=${{ needs.versioning.outputs.semVer }}
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$VERSION" -m "Release $VERSION [skip ci]"
+          git push origin "$VERSION"

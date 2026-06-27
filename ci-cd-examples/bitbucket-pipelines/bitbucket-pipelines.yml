@@ -3,22 +3,39 @@ clone:
   depth: full
 
 pipelines:
-  default:
-    - step:
-        name: Calculate GitVersion
-        # Используем официальный образ GitVersion версии 6.x
-        image: gittools/gitversion:6.0.2-debian.11-6.0
-        script:
-          - VERSION=$(/tools/dotnet-gitversion /output json /showvariable SemVer)
-          - echo "Вычисленная версия $VERSION"
-          # Сохраняем в файл для передачи между шагами пайплайна
-          - echo "export VERSION=$VERSION" > version.env
-        artifacts:
-          - version.env
+  custom: # Пользовательские пайплайны запускаются только вручную из UI
+    build_and_tag:
+      - step:
+          name: Calculate GitVersion
+          # Используем официальный образ GitVersion версии 6.x
+          image: gittools/gitversion:6.0.2-debian.11-6.0
+          script:
+            - VERSION=$(/tools/dotnet-gitversion /output json /showvariable SemVer)
+            - echo "Вычисленная версия $VERSION"
+            # Сохраняем в файл для передачи между шагами пайплайна
+            - echo "export VERSION=$VERSION" > version.env
+          artifacts:
+            - version.env
 
-    - step:
-        name: Build and Push
-        script:
-          - source version.env
-          - echo "Собираем докер образ с тегом $VERSION"
-          # - docker build -t my-app:$VERSION .
+      - step:
+          name: Build and Tag
+          script:
+            - source version.env
+            - echo "Собираем докер образ с тегом $VERSION и пушим..."
+            - echo "Создаем Git-тег $VERSION..."
+            - |
+              # В реальном пайплайне:
+              # git tag -a "$VERSION" -m "Release $VERSION [skip ci]"
+              # git push origin "$VERSION"
+              echo "Тег создан"
+
+    deploy_by_tag:
+      - variables:
+          - name: TARGET_TAG
+            description: "Укажите тег для деплоя (например, 1.2.0)"
+      - step:
+          name: Deploy to Production
+          script:
+            - if [ -z "$TARGET_TAG" ]; then echo "TARGET_TAG is required!"; exit 1; fi
+            - echo "Скачиваем артефакт/образ для тега $TARGET_TAG..."
+            - echo "Разворачиваем версию $TARGET_TAG в Production..."
