@@ -11,7 +11,7 @@ phases:
     commands:
       - 'git fetch --tags || true'
       - 'echo "Calculating Semantic Version using GitVersion..."'
-      - 'VERSION=$(dotnet-gitversion /output json /showvariable SemVer)'
+      - 'VERSION=$(dotnet-gitversion /output json /showvariable MajorMinorPatch)'
       - 'echo "Computed Version - $VERSION"'
 
   build:
