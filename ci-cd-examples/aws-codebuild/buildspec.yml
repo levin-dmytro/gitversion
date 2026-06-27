@@ -45,9 +45,9 @@ phases:
           echo "Action: Building RELEASE image for tag $VERSION"
           echo "Applying double tags and OCI labels..."
           
-          echo "docker build -t my-app:$VERSION -t my-app:$SHORT_SHA \\"
+          echo "docker build -t \${IMAGE_REPO_NAME:-my-app}:$VERSION -t \${IMAGE_REPO_NAME:-my-app}:$SHORT_SHA \\"
           echo "  --label org.opencontainers.image.revision=$COMMIT_SHA \\"
-          echo "  --label org.opencontainers.image.source=https://github.com/levin-dmytro/gitversion.git \\"
+          echo "  --label org.opencontainers.image.source=\${CODEBUILD_SOURCE_REPO_URL:-https://github.com/levin-dmytro/gitversion.git} \\"
           echo "  ."
           
           echo "Simulated push to ECR..."
@@ -60,9 +60,9 @@ phases:
           echo "Action: Building DEV/FEATURE image for $VERSION"
           echo "Applying double tags and OCI labels..."
           
-          echo "docker build -t my-app:$VERSION -t my-app:$SHORT_SHA \\"
+          echo "docker build -t \${IMAGE_REPO_NAME:-my-app}:$VERSION -t \${IMAGE_REPO_NAME:-my-app}:$SHORT_SHA \\"
           echo "  --label org.opencontainers.image.revision=$COMMIT_SHA \\"
-          echo "  --label org.opencontainers.image.source=https://github.com/levin-dmytro/gitversion.git \\"
+          echo "  --label org.opencontainers.image.source=\${CODEBUILD_SOURCE_REPO_URL:-https://github.com/levin-dmytro/gitversion.git} \\"
           echo "  ."
           
           echo "Simulated push to ECR..."
