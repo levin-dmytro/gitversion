@@ -9,6 +9,8 @@ phases:
 
   pre_build:
     commands:
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - echo "Calculating Semantic Version using GitVersion..."
       - VERSION=$(dotnet-gitversion /output json /showvariable SemVer)
       - SHORT_SHA=$(dotnet-gitversion /output json /showvariable ShortSha)
@@ -22,10 +24,15 @@ phases:
       - echo "Applying double tags and OCI labels..."
       
       - |
-        echo "docker build -t \${IMAGE_REPO_NAME:-my-app}:$VERSION -t \${IMAGE_REPO_NAME:-my-app}:$SHORT_SHA \\"
-        echo "  --label org.opencontainers.image.revision=$COMMIT_SHA \\"
-        echo "  --label org.opencontainers.image.source=\${CODEBUILD_SOURCE_REPO_URL:-https://github.com/levin-dmytro/gitversion.git} \\"
-        echo "  ."
-      
-      - echo "Simulated push to ECR..."
+        docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$VERSION \
+                     -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$SHORT_SHA \
+          --label org.opencontainers.image.revision=$COMMIT_SHA \
+          --label org.opencontainers.image.source=$CODEBUILD_SOURCE_REPO_URL \
+          .
+
+  post_build:
+    commands:
+      - echo "Pushing Docker images to ECR..."
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$VERSION
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$SHORT_SHA
       - echo "Simulated trigger of Deploy Pipeline..."
